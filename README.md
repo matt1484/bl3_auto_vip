@@ -6,6 +6,7 @@ Current zips of standalone executable can be found at
 https://drive.google.com/drive/folders/1cFpaUXDhXYTHUSFXvQPV1NCK7-E5N619
 
 Requires .NET core 3.0 (or you can change the version in the .csproj)
+
 To run from source:
 
 1. download project
