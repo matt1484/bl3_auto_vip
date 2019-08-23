@@ -53,7 +53,9 @@ namespace Bl3AutoVip
             var driverFolder = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)? "windows":
                                RuntimeInformation.IsOSPlatform(OSPlatform.Linux)? "linux":
                                "mac";
-            var fetcherOptions = new BrowserFetcherOptions() { Path = Path.Join(".browsers" , driverFolder) };
+            var baseFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            baseFolder = String.IsNullOrEmpty(baseFolder)? Path.Join(Environment.GetEnvironmentVariable("HOME"), "/.local/share"): baseFolder;
+            var fetcherOptions = new BrowserFetcherOptions() { Path = Path.Join(baseFolder, "bl3-auto-vip-browsers" , driverFolder) };
             var fetcher = new BrowserFetcher(fetcherOptions);
             RevisionInfo execInfo;
             try
