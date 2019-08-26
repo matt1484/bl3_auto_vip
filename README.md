@@ -5,13 +5,13 @@ Cross platform .NET Core app for automatically redeeming VIP codes for Borderlan
 Current zips of standalone executable can be found at
 https://drive.google.com/drive/folders/1cFpaUXDhXYTHUSFXvQPV1NCK7-E5N619
 
-Requires .NET core 3.0 (or you can change the version in the .csproj)
-To run from source:
 
-1. download project
-2. navigate to project
-3. run `dotnet restore`
-4. run `dotnet run`
+To run from source:
+1. install .NET core 3.0 (or change version in .csproj)
+2. download project
+3. navigate to project
+4. run `dotnet restore`
+5. run `dotnet run`
 
 
 Note: the first time running make take longer than expected since it needs to download a few extra things,
