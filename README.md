@@ -13,8 +13,4 @@ To run from source:
 4. run `dotnet restore`
 5. run `dotnet run`
 
-
-Note: the first time running make take longer than expected since it needs to download a few extra things,
-
-Note: this program creates a folder named `bl3-auto-vip-browsers` at `Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);`
-for Mac/Windows and `$HOME/.local/share/` for linux. This should be deleted if you no longer wish to use this program.
+Run it with `--help` to view command line args that are supported.
