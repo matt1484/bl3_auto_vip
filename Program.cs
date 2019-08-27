@@ -248,8 +248,10 @@ namespace Bl3AutoVip
                     catch
                     {
                         Console.WriteLine("failed! Unknown error.");
+                        continue;
                     }
-
+                    Console.WriteLine("success!");
+                    
                     // Redeem Codes
                     foreach (var code in keyValue.Value)
                     {
