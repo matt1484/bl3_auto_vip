@@ -23,6 +23,21 @@ namespace Bl3AutoVip
 
     public static class Bl3AutoVip
     {   
+        public static void Exit(Exception ex = null)
+        {
+            if (ex != null)
+            {
+                Console.WriteLine("failed! Had error: ");
+                Console.WriteLine(ex.ToString());
+            }
+            Console.Write("Exiting in ");
+            for (int i = 5; i > 0; i--)
+            {
+                Console.Write(i + " ");
+                Thread.Sleep(1000);
+            }
+            Console.WriteLine("");
+        }
         static async Task Main(string[] args)
         {
             try
@@ -54,10 +69,10 @@ namespace Bl3AutoVip
                     client.DefaultRequestHeaders.Add("Origin", "https://borderlands.com");
                     client.DefaultRequestHeaders.Add("Referer", "https://borderlands.com/en-US/vip/");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Console.WriteLine("failed! Try again later.");
-                    throw;
+                    Exit(ex);
+                    return;
                 }
                 Console.WriteLine("success!");
 
@@ -74,18 +89,27 @@ namespace Bl3AutoVip
                     if (!response.StatusCode.Equals(HttpStatusCode.OK))
                     {
                         Console.WriteLine("failed! Did you use the correct password?");
+                        Exit();
                         return;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Console.WriteLine("failed! Try again later.");
-                    throw;
+                    Exit(ex);
+                    return;
                 }
                 Console.WriteLine("success!");
 
                 // Get Previous Codes
                 Console.Write("Getting previously redeemed codes . . . . . ");
+                var codeTypes = new Dictionary<string, string>() 
+                { 
+                    {"vault", ""},
+                    {"diamond", ""},
+                    {"creator", ""},
+                    {"email", ""},
+                    {"boost", ""},
+                };
                 var redeemedCodes = new List<string>();
                 try
                 {
@@ -99,7 +123,7 @@ namespace Bl3AutoVip
                             {
                                 newest_activities = new 
                                 {
-                                    properties = new string [] { "notes" },
+                                    properties = new string [] { "notes", "title" },
                                     query = new 
                                     { 
                                         type = "user_activities_me", 
@@ -113,20 +137,39 @@ namespace Bl3AutoVip
                     var activities = JsonConvert.DeserializeObject<dynamic>(await response.Content.ReadAsStringAsync()).model_data.activity.newest_activities.ToObject<IEnumerable<dynamic>>();
                     foreach (var activity in activities)
                     {
-                        redeemedCodes.Add(activity.notes.ToObject<string>()?.ToUpper() ?? "");
+                        var code = "";
+                        var codeType = "";
+                        try
+                        {
+                            code = activity.notes.ToObject<string>().ToUpper() ?? "";
+                            codeType = activity.title.ToObject<string>().ToLower() ?? "";
+                        }
+                        catch {};
+                        if (!String.IsNullOrEmpty(code) || !String.IsNullOrEmpty(codeType))
+                        {
+                            codeType = codeTypes.Keys.FirstOrDefault(x => codeType.Contains(x)) ?? "";
+                            redeemedCodes.Add(codeType + ":" + code);
+                        }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Console.WriteLine("failed! Try again later.");
-                    throw;
+                    Exit(ex);
+                    return;
                 }
                 Console.WriteLine("success!");
 
-                // Get Code URLs
+                // Get New Codes
                 Console.Write("Getting new codes . . . . . ");
                 IBrowsingContext browsingContext;
-                var codesToRedeem = new Dictionary<string, List<string>>();
+                var codesToRedeem = new Dictionary<string, List<string>>()
+                { 
+                    {"vault", new List<string>()},
+                    {"diamond", new List<string>()},
+                    {"creator", new List<string>()},
+                    {"email", new List<string>()},
+                    {"boost", new List<string>()},
+                };;
                 try
                 {
                     browsingContext = BrowsingContext.New(Configuration.Default.WithDefaultLoader());
@@ -134,40 +177,37 @@ namespace Bl3AutoVip
                     foreach (var row in redditHtml.QuerySelectorAll("tbody tr"))
                     {
                         var columns = row.QuerySelectorAll("td").Select(x => x.TextContent).ToArray();
-                        if (String.IsNullOrEmpty(columns[3]) || String.IsNullOrEmpty(columns[1]) || redeemedCodes.Contains(columns[0].ToUpper()) || columns[2].ToUpper().Contains("NO"))
-                            continue;
-                        if (!codesToRedeem.ContainsKey(columns[3].ToLower())) 
+                        var code = columns[0]?.ToUpper() ?? "";
+                        var codeType = columns[3]?.ToLower() ?? "";
+                        foreach (var key in codeTypes.Keys.Where(x => codeType.Contains(x)))
                         {
-                            codesToRedeem[columns[3].ToLower()] = new List<string>();
+                            if (!redeemedCodes.Contains(key + ":" + code) && !columns[2].ToUpper().Contains("NO"))
+                            {
+                                codesToRedeem[key].Add(code);
+                            }
+                            
                         }
-                        codesToRedeem[columns[3].ToLower()].Add(columns[0].ToUpper());
+                        
                     }
-                    if (codesToRedeem.Count == 0)
+                    if (codesToRedeem.Values.Sum(x => x.Count) == 0)
                     {
                         Console.WriteLine("No new codes at this time. Try again later.");
+                        Exit();
                         return;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Console.WriteLine("failed! Try again later.");
-                    throw;
+                    Exit(ex);
+                    return;
                 }
-                Console.WriteLine("success! Found " + codesToRedeem.Count + " unredeemed codes!");
+                Console.WriteLine("success! Found " + codesToRedeem.Values.Sum(x => x.Count) + " unredeemed codes!");
 
                 // Get Code URLs
                 Console.Write("Getting code redemption URLs . . . . . ");
                 IDocument widgetHtml;
                 string widgetConfJson;
                 dynamic widgetConf;
-                var codeTypes = new Dictionary<string, string>() 
-                { 
-                    {"vault", ""},
-                    {"diamond", ""},
-                    {"creator", ""},
-                    {"email", ""},
-                    {"boost", ""}, // hmmmmmmmm
-                };
                 try
                 { 
                     widgetHtml = await browsingContext.OpenAsync("https://2kgames.crowdtwist.com/widgets/t/activity-list/9904/?__locale__=en#2");
@@ -175,19 +215,26 @@ namespace Bl3AutoVip
                     widgetConf = JsonConvert.DeserializeObject<dynamic>(String.Join("", String.Join("", widgetConfJson.Split("widgetConf").Skip(1)).Split("=").Skip(1)).Split(';')[0].Trim());
                     foreach (var widget in widgetConf["entries"].ToObject<List<dynamic>>())
                     {
-                        codeTypes[codeTypes.Keys.FirstOrDefault(x => widget.link.widgetName.ToObject<string>().ToLower().Contains(x)) ?? "_"] = widget.link.widgetId.ToObject<string>().ToLower();
+                        var codeType = codeTypes.Keys.FirstOrDefault(x => widget.link.widgetName.ToObject<string>().ToLower().Contains(x));
+                        if (!String.IsNullOrEmpty(codeType))
+                        {
+                            codeTypes[codeType] = widget.link.widgetId.ToObject<string>().ToLower();
+                        }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Console.WriteLine("failed! Try again later.");
-                    throw;
+                    Exit(ex);
+                    return;
                 }
                 Console.WriteLine("success!");
 
+                
                 foreach(var keyValue in codesToRedeem)
                 {
                     // Setup Code Type
+                    if (keyValue.Value.Count < 1)
+                        continue;
                     Console.WriteLine("Setting up codes of type '" + keyValue.Key + "' . . . . . ");
                     var codeRedemptionUrl = "";
                     try
@@ -223,31 +270,21 @@ namespace Bl3AutoVip
                                 Console.WriteLine(response.StatusCode.ToString() + " . . . " + "(unable to read response effectively.)");
                             }
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("failed!. Unknown error.");
-                            throw;
+                            Exit(ex);
+                            return;
                         }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    Console.Write("Failed. Cleaning up . . . . . ");
-                    Thread.Sleep(3000);
-                    Console.WriteLine("success!");
-                }
-                throw;
+                Exit(ex);
+                return;
             }
             Console.WriteLine("Done!");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Console.Write("Cleaning up . . . . . ");
-                Thread.Sleep(3000);
-                Console.WriteLine("success!");
-            }
+            Exit();
         }
     }
 }
