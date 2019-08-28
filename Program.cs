@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
@@ -52,7 +52,29 @@ namespace Bl3AutoVip
                 if (String.IsNullOrEmpty(cmdArgs.Password))
                 {
                     Console.Write("Enter password        : ");
-                    cmdArgs.Password = Console.ReadLine();
+                    cmdArgs.Password = "";
+                    do
+                    {
+                        ConsoleKeyInfo key = Console.ReadKey(true);
+                        if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)
+                        {
+                            cmdArgs.Password += key.KeyChar;
+                            Console.Write("*");
+                        }
+                        else
+                        {
+                            if (key.Key == ConsoleKey.Backspace && cmdArgs.Password.Length > 0)
+                            {
+                                cmdArgs.Password = cmdArgs.Password.Substring(0, (cmdArgs.Password.Length - 1));
+                                Console.Write("\b \b");
+                            }
+                            else if(key.Key == ConsoleKey.Enter)
+                            {
+                                break;
+                            }
+                        }
+                    } while (true);
+                    Console.WriteLine("");
                 }
 
                 // Setup
@@ -169,16 +191,17 @@ namespace Bl3AutoVip
                     {"creator", new List<string>()},
                     {"email", new List<string>()},
                     {"boost", new List<string>()},
-                };;
+                };
                 try
                 {
                     browsingContext = BrowsingContext.New(Configuration.Default.WithDefaultLoader());
                     var redditHtml =  await browsingContext.OpenAsync("https://www.reddit.com/r/borderlands3/comments/bxgq5p/borderlands_vip_program_codes/");
-                    foreach (var row in redditHtml.QuerySelectorAll("tbody tr"))
+                    foreach (var row in redditHtml.QuerySelectorAll("[data-test-id='post-content'] tbody tr"))
                     {
                         var columns = row.QuerySelectorAll("td").Select(x => x.TextContent).ToArray();
                         var code = columns[0]?.ToUpper() ?? "";
                         var codeType = columns[3]?.ToLower() ?? "";
+                        Console.WriteLine(code + codeType);
                         foreach (var key in codeTypes.Keys.Where(x => codeType.Contains(x)))
                         {
                             if (!redeemedCodes.Contains(key + ":" + code) && !columns[2].ToUpper().Contains("NO"))
