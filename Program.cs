@@ -201,7 +201,6 @@ namespace Bl3AutoVip
                         var columns = row.QuerySelectorAll("td").Select(x => x.TextContent).ToArray();
                         var code = columns[0]?.ToUpper() ?? "";
                         var codeType = columns[3]?.ToLower() ?? "";
-                        Console.WriteLine(code + codeType);
                         foreach (var key in codeTypes.Keys.Where(x => codeType.Contains(x)))
                         {
                             if (!redeemedCodes.Contains(key + ":" + code) && !columns[2].ToUpper().Contains("NO"))
