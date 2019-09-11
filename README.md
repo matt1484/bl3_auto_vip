@@ -3,7 +3,7 @@
 Cross platform Go app for automatically redeeming VIP codes for Borderlands 3
 
 Current zips of standalone executable can be found at
-http://www.mediafire.com/folder/aatm7o7bc9eij/bl3-auto-vip
+https://github.com/matt1484/bl3_auto_vip/releases
 
 
 To run from source:
