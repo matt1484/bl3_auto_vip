@@ -2,10 +2,11 @@ package bl3_auto_vip
 
 import (
 	"errors"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/thedevsaddam/gojsonq"
 	"strconv"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/thedevsaddam/gojsonq"
 )
 
 type VipCodeTypeMap map[string]string
@@ -15,7 +16,7 @@ type VipCodeMap map[string]StringSet
 func (v VipCodeMap) Diff(other VipCodeMap) VipCodeMap {
 	diff := NewVipCodeMap()
 	for codeType, codes := range v {
-		for code, _ := range codes {
+		for code := range codes {
 			if _, found := other[codeType][code]; !found {
 				diff[codeType].Add(code)
 			}
@@ -33,7 +34,7 @@ func (v VipCodeMap) Add(codeType, code string) {
 }
 
 func GetCodeTypes() []string {
-	return []string {
+	return []string{
 		"pax",
 		"boost",
 		"email",
@@ -88,8 +89,8 @@ func NewBl3VipClient() (*Bl3VipClient, error) {
 	}, nil
 }
 
-func (client *Bl3VipClient) Login(username string, password string)	error {
-	data := map[string]string {
+func (client *Bl3VipClient) Login(username string, password string) error {
+	data := map[string]string{
 		"username": username,
 		"password": password,
 	}
@@ -108,7 +109,7 @@ func (client *Bl3VipClient) Login(username string, password string)	error {
 		return errors.New("Failed to start session")
 	}
 
-	sessionRes, err := client.Get(loginRes.Header.Get("X-CT-REDIRECT")) 
+	sessionRes, err := client.Get(loginRes.Header.Get("X-CT-REDIRECT"))
 	if err != nil {
 		return errors.New("Failed to get session")
 	}
@@ -133,8 +134,8 @@ func (client *Bl3VipClient) GetFullCodeMap() (VipCodeMap, error) {
 	if err != nil {
 		return codeMap, err
 	}
-	
-	redditHtml.Find("[data-test-id='post-content'] tbody tr").Each(func (i int, row *goquery.Selection) {
+
+	redditHtml.Find("[data-test-id='post-content'] tbody tr").Each(func(i int, row *goquery.Selection) {
 		if len(row.Find("td").Nodes) < 4 {
 			return
 		}
@@ -142,7 +143,7 @@ func (client *Bl3VipClient) GetFullCodeMap() (VipCodeMap, error) {
 		codeTypes := ""
 		code := ""
 
-		row.Find("td").EachWithBreak(func (i int, col *goquery.Selection) bool {
+		row.Find("td").EachWithBreak(func(i int, col *goquery.Selection) bool {
 			if i == 2 && strings.Contains(strings.ToLower(col.Text()), "no") {
 				return false
 			}
@@ -155,7 +156,7 @@ func (client *Bl3VipClient) GetFullCodeMap() (VipCodeMap, error) {
 			}
 			return true
 		})
-		
+
 		for _, codeType := range GetCodeTypesInString(codeTypes) {
 			codeMap[codeType].Add(code)
 		}
@@ -172,11 +173,11 @@ func (client *Bl3VipClient) GetRedeemedCodeMap() (VipCodeMap, error) {
 			"activity": map[string]interface{}{
 				"newest_activities": map[string]interface{}{
 					"properties": []string{"notes", "title"},
-					"query": map[string]interface{}{ 
-						"type": "user_activities_me", 
-						"args":  map[string]int{
+					"query": map[string]interface{}{
+						"type": "user_activities_me",
+						"args": map[string]int{
 							"row_start": 1,
-							"row_end": 1000000,
+							"row_end":   1000000,
 						},
 					},
 				},
@@ -186,12 +187,12 @@ func (client *Bl3VipClient) GetRedeemedCodeMap() (VipCodeMap, error) {
 
 	res, err := client.PostJson(url, data)
 	if err != nil {
-        return codeMap, errors.New("Failed to get redeemed code list")
-    }
-	
+		return codeMap, errors.New("Failed to get redeemed code list")
+	}
+
 	type activity struct {
-		CodeTypes  string     `json:"title"`
-		Code  string          `json:"notes"`
+		CodeTypes string `json:"title"`
+		Code      string `json:"notes"`
 	}
 
 	activities := make([]activity, 0)
@@ -201,13 +202,13 @@ func (client *Bl3VipClient) GetRedeemedCodeMap() (VipCodeMap, error) {
 	}
 
 	resJson.From("model_data.activity.newest_activities").Out(&activities)
-	
+
 	for _, act := range activities {
 		for _, codeType := range GetCodeTypesInString(act.CodeTypes) {
 			codeMap.Add(codeType, act.Code)
 		}
 	}
-    return codeMap, nil
+	return codeMap, nil
 }
 
 func (client *Bl3VipClient) getWidgetConf(url string) *gojsonq.JSONQ {
@@ -223,7 +224,7 @@ func (client *Bl3VipClient) getWidgetConf(url string) *gojsonq.JSONQ {
 
 	script := ""
 
-	widgetHtml.Find("script").EachWithBreak(func (i int, scriptTag *goquery.Selection) bool {
+	widgetHtml.Find("script").EachWithBreak(func(i int, scriptTag *goquery.Selection) bool {
 		if strings.Contains(scriptTag.Text(), "widgetConf") {
 			script = scriptTag.Text()
 			return false
@@ -245,13 +246,13 @@ func (client *Bl3VipClient) GetCodeTypeUrlMap() (VipCodeTypeMap, error) {
 	}
 
 	type widget struct {
-		WidgetId  int        `json:"widgetId"`
-		WidgetName  string   `json:"widgetName"`
+		WidgetId   int    `json:"widgetId"`
+		WidgetName string `json:"widgetName"`
 	}
 
 	widgets := make([]widget, 0)
 	widgetConf.From("entries").Select("link.widgetId", "link.widgetName").Out(&widgets)
-	
+
 	for _, wid := range widgets {
 		for _, codeType := range GetCodeTypesInString(wid.WidgetName) {
 			codeTypeUrlMap[codeType] = "https://2kgames.crowdtwist.com/widgets/t/code-redemption/" + strconv.Itoa(wid.WidgetId)
