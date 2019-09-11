@@ -3,7 +3,7 @@
 Cross platform .NET Core app for automatically redeeming VIP codes for Borderlands 3
 
 Current zips of standalone executable can be found at
-https://drive.google.com/drive/folders/1cFpaUXDhXYTHUSFXvQPV1NCK7-E5N619
+http://www.mediafire.com/folder/aatm7o7bc9eij/bl3-auto-vip
 
 
 To run from source:
