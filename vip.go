@@ -2,10 +2,10 @@ package bl3_auto_vip
 
 import (
 	"errors"
-	"strings"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/thedevsaddam/gojsonq"
 	"strconv"
+	"strings"
 )
 
 type VipCodeTypeMap map[string]string

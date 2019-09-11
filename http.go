@@ -1,13 +1,14 @@
 package bl3_auto_vip
 
 import (
-	. "net/http"
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io"
 	"io/ioutil"
+	. "net/http"
 	"net/http/cookiejar"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/thedevsaddam/gojsonq"
 )
@@ -26,13 +27,13 @@ func NewHttpClient() (*HttpClient, error) {
 	if err != nil {
 		return nil, errors.New("Failed to setup cookies")
 	}
-	
-	return &HttpClient {
-		Client {
+
+	return &HttpClient{
+		Client{
 			Jar: jar,
 		},
-		Header {
-			"User-Agent": []string {"BL3 Auto Vip"},
+		Header{
+			"User-Agent": []string{"BL3 Auto Vip"},
 		},
 	}, nil
 }
@@ -56,14 +57,14 @@ func (response *HttpResponse) BodyAsJson() (*gojsonq.JSONQ, error) {
 	defer response.Body.Close()
 
 	bodyBytes, err := ioutil.ReadAll(response.Body)
-    if err != nil {
-        return nil, errors.New("Invalid response json")
+	if err != nil {
+		return nil, errors.New("Invalid response json")
 	}
 
 	return JsonFromBytes(bodyBytes), nil
 }
 
-func getResponse(res *Response, err error) (*HttpResponse, error){
+func getResponse(res *Response, err error) (*HttpResponse, error) {
 	return &HttpResponse{
 		*res,
 	}, err
@@ -107,7 +108,7 @@ func (client *HttpClient) Post(url, contentType string, body io.Reader) (*HttpRe
 	return client.Do(req)
 }
 
-func (client *HttpClient) PostJson(url string, data interface {}) (*HttpResponse, error){
+func (client *HttpClient) PostJson(url string, data interface{}) (*HttpResponse, error) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return nil, err

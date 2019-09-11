@@ -14,6 +14,6 @@ func JsonFromString(s string) *gojsonq.JSONQ {
 	return gojsonq.New().JSONString(s)
 }
 
-func JsonFromBytes(bytes []byte) *gojsonq.JSONQ{
+func JsonFromBytes(bytes []byte) *gojsonq.JSONQ {
 	return JsonFromString(string(bytes))
 }

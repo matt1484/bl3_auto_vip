@@ -1,27 +1,27 @@
 package main
 
 import (
-	"fmt"
+	"bufio"
 	"flag"
+	"fmt"
+	"os"
 	"strconv"
 	"time"
-	"bufio"
-	"os"
 	// "golang.org/x/crypto/ssh/terminal"
 	bl3 "github.com/matt1484/bl3_auto_vip"
 )
 
-func printError(err error){
+func printError(err error) {
 	fmt.Println("failed!")
 	fmt.Print("Had error: ")
 	fmt.Println(err)
 	exit()
 }
 
-func exit(){
+func exit() {
 	fmt.Print("Exiting in ")
 	for i := 5; i > 0; i-- {
-		fmt.Print(strconv.Itoa(i) + " ");
+		fmt.Print(strconv.Itoa(i) + " ")
 		time.Sleep(time.Second)
 	}
 	fmt.Println("")
@@ -31,9 +31,9 @@ func main() {
 	var username string
 	var password string
 	flag.StringVar(&username, "e", "", "Email")
-    flag.StringVar(&username, "email", "", "Email")
+	flag.StringVar(&username, "email", "", "Email")
 	flag.StringVar(&password, "p", "", "Password")
-    flag.StringVar(&password, "password", "", "Password")
+	flag.StringVar(&password, "password", "", "Password")
 	flag.Parse()
 
 	if username == "" {
@@ -58,7 +58,7 @@ func main() {
 		return
 	}
 	fmt.Println("success!")
-	
+
 	fmt.Print("Logging in as '" + username + "' . . . . . ")
 	err = client.Login(username, password)
 	if err != nil {
@@ -124,7 +124,7 @@ func main() {
 		for code := range codes {
 			fmt.Print("Trying '" + codeType + "' code '" + code + "' . . . . . ")
 
-			res, err := client.PostJson(redemptionUrl, map[string]string {
+			res, err := client.PostJson(redemptionUrl, map[string]string{
 				"code": code,
 			})
 			if err != nil {
