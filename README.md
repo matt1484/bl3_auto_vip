@@ -5,8 +5,16 @@ Cross platform Go app for automatically redeeming VIP codes for Borderlands 3
 Current zips of standalone executable can be found at
 https://github.com/matt1484/bl3_auto_vip/releases
 
+### Getting Started:
+1. Make a VIP account at https://borderlands.com/en-US/vip/
+2. Download program from above link
+3. Unzip the folder
+4. Run it, you will be prompted for username and password
+5. Enter username and password (we don’t Store this information)
+6. Watch it do it’s magic
+7. Repeat when more codes come out
 
-To run from source:
+### To run from source:
 1. install docker
 2. download project
 3. navigate to project
@@ -15,15 +23,14 @@ To run from source:
 
 Run it with `--help` to view command line args that are supported.
 
-Update Log: 
-
+### Update Log: 
 * v1.0: Initial release 
 * v1.1: Fixed timeout issues and added support for command line args (email and password) p.s. it is also much faster
 * v1.2: Added a timer so it does not immediately close when done and also added support for codes with multiple types
 * v1.2.1: Fixed bug where tables in comments would count as codes and add password masking
 * v1.3: Rewrote all code in go to add future mobile support (also more maintainable and smaller executable)
 
-To do:
+### To do:
 * shift codes redemption
 * auto facebook/instagram/twitter weekly points (cant watch videos but can read the articles maybe)
 * fake emails for referral points (captcha is making this hard, so maybe not...)
