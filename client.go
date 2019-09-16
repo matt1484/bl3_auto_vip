@@ -115,3 +115,50 @@ func (client *HttpClient) PostJson(url string, data interface{}) (*HttpResponse,
 	}
 	return client.Post(url, "application/json", bytes.NewBuffer(jsonData))
 }
+
+type Bl3Client struct {
+	HttpClient
+}
+
+func NewBl3Client() (*Bl3Client, error) {
+	client, err := NewHttpClient()
+	if err != nil {
+		return nil, errors.New("Failed to start client")
+	}
+
+	client.SetDefaultHeader("Origin", "https://borderlands.com")
+	client.SetDefaultHeader("Referer", "https://borderlands.com/en-US/vip/")
+
+	return &Bl3Client {
+		*client,
+	}, nil
+}
+
+func (client *Bl3Client) Login(username string, password string) error {
+	data := map[string]string{
+		"username": username,
+		"password": password,
+	}
+
+	loginRes, err := client.PostJson("https://api.2k.com/borderlands/users/authenticate", data)
+	if err != nil {
+		return errors.New("Failed to submit login credentials")
+	}
+	defer loginRes.Body.Close()
+
+	if loginRes.StatusCode != 200 {
+		return errors.New("Failed to login")
+	}
+
+	if loginRes.Header.Get("X-CT-REDIRECT") == "" {
+		return errors.New("Failed to start session")
+	}
+
+	sessionRes, err := client.Get(loginRes.Header.Get("X-CT-REDIRECT"))
+	if err != nil {
+		return errors.New("Failed to get session")
+	}
+	defer sessionRes.Body.Close()
+
+	return nil
+}

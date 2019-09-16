@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 	"time"
-	// "golang.org/x/crypto/ssh/terminal"
+	
 	bl3 "github.com/matt1484/bl3_auto_vip"
 )
 
@@ -52,7 +52,7 @@ func main() {
 	}
 
 	fmt.Print("Setting up . . . . . ")
-	client, err := bl3.NewBl3VipClient()
+	client, err := bl3.NewBl3Client()
 	if err != nil {
 		printError(err)
 		return
@@ -68,7 +68,7 @@ func main() {
 	fmt.Println("success!")
 
 	fmt.Print("Getting previously redeemed codes . . . . . ")
-	redeemedCodes, err := client.GetRedeemedCodeMap()
+	redeemedCodes, err := client.GetRedeemedVipCodeMap()
 	if err != nil {
 		printError(err)
 		return
@@ -76,7 +76,7 @@ func main() {
 	fmt.Println("success!")
 
 	fmt.Print("Getting new codes . . . . . ")
-	allCodes, err := client.GetFullCodeMap()
+	allCodes, err := bl3.GetFullVipCodeMap()
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -95,11 +95,7 @@ func main() {
 	}
 
 	fmt.Print("Getting code redemption URLs . . . . . ")
-	codeUrlMap, err := client.GetCodeTypeUrlMap()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	codeUrlMap := bl3.GetVipCodeUrlMap()
 	fmt.Println("success!")
 
 	for codeType, codes := range newCodes {
@@ -113,18 +109,12 @@ func main() {
 			fmt.Println("invalid! Moving on.")
 			continue
 		}
-
-		redemptionUrl, err := client.GetCodeRedemptionUrl(codeUrl)
-		if err != nil {
-			fmt.Println("failed! Moving on.")
-			continue
-		}
-
 		fmt.Println("success!")
+
 		for code := range codes {
 			fmt.Print("Trying '" + codeType + "' code '" + code + "' . . . . . ")
 
-			res, err := client.PostJson(redemptionUrl, map[string]string{
+			res, err := client.PostJson(codeUrl, map[string]string{
 				"code": code,
 			})
 			if err != nil {

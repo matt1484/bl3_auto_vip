@@ -1,6 +1,7 @@
 package bl3_auto_vip
 
 import (
+	// "fmt"
 	"errors"
 	"strconv"
 	"strings"
@@ -8,8 +9,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/thedevsaddam/gojsonq"
 )
-
-type VipCodeTypeMap map[string]string
 
 type VipCodeMap map[string]StringSet
 
@@ -35,12 +34,9 @@ func (v VipCodeMap) Add(codeType, code string) {
 
 func GetCodeTypes() []string {
 	return []string{
-		"pax",
-		"boost",
 		"email",
 		"creator",
 		"vault",
-		"diamond",
 	}
 }
 
@@ -55,14 +51,6 @@ func GetCodeTypesInString(s string) []string {
 	return types
 }
 
-func NewVipCodeTypeMap() VipCodeTypeMap {
-	codeTypeMap := make(map[string]string)
-	for _, codeType := range GetCodeTypes() {
-		codeTypeMap[codeType] = ""
-	}
-	return codeTypeMap
-}
-
 func NewVipCodeMap() VipCodeMap {
 	codeTypeMap := make(map[string]StringSet)
 	for _, codeType := range GetCodeTypes() {
@@ -71,54 +59,7 @@ func NewVipCodeMap() VipCodeMap {
 	return codeTypeMap
 }
 
-type Bl3VipClient struct {
-	HttpClient
-}
-
-func NewBl3VipClient() (*Bl3VipClient, error) {
-	client, err := NewHttpClient()
-	if err != nil {
-		return nil, errors.New("Failed to start client")
-	}
-
-	client.SetDefaultHeader("Origin", "https://borderlands.com")
-	client.SetDefaultHeader("Referer", "https://borderlands.com/en-US/vip/")
-
-	return &Bl3VipClient{
-		*client,
-	}, nil
-}
-
-func (client *Bl3VipClient) Login(username string, password string) error {
-	data := map[string]string{
-		"username": username,
-		"password": password,
-	}
-
-	loginRes, err := client.PostJson("https://api.2k.com/borderlands/users/authenticate", data)
-	if err != nil {
-		return errors.New("Failed to submit login credentials")
-	}
-	defer loginRes.Body.Close()
-
-	if loginRes.StatusCode != 200 {
-		return errors.New("Failed to login")
-	}
-
-	if loginRes.Header.Get("X-CT-REDIRECT") == "" {
-		return errors.New("Failed to start session")
-	}
-
-	sessionRes, err := client.Get(loginRes.Header.Get("X-CT-REDIRECT"))
-	if err != nil {
-		return errors.New("Failed to get session")
-	}
-	defer sessionRes.Body.Close()
-
-	return nil
-}
-
-func (client *Bl3VipClient) GetFullCodeMap() (VipCodeMap, error) {
+func GetFullVipCodeMap() (VipCodeMap, error) {
 	codeMap := NewVipCodeMap()
 	httpClient, err := NewHttpClient()
 	if err != nil {
@@ -164,7 +105,7 @@ func (client *Bl3VipClient) GetFullCodeMap() (VipCodeMap, error) {
 	return codeMap, nil
 }
 
-func (client *Bl3VipClient) GetRedeemedCodeMap() (VipCodeMap, error) {
+func (client *Bl3Client) GetRedeemedVipCodeMap() (VipCodeMap, error) {
 	codeMap := NewVipCodeMap()
 
 	url := "https://2kgames.crowdtwist.com/request?widgetId=9470"
@@ -211,7 +152,7 @@ func (client *Bl3VipClient) GetRedeemedCodeMap() (VipCodeMap, error) {
 	return codeMap, nil
 }
 
-func (client *Bl3VipClient) getWidgetConf(url string) *gojsonq.JSONQ {
+func (client *Bl3Client) getVipWidgetConf(url string) *gojsonq.JSONQ {
 	response, err := client.Get(url)
 	if err != nil {
 		return nil
@@ -237,10 +178,10 @@ func (client *Bl3VipClient) getWidgetConf(url string) *gojsonq.JSONQ {
 	return json
 }
 
-func (client *Bl3VipClient) GetCodeTypeUrlMap() (VipCodeTypeMap, error) {
-	codeTypeUrlMap := NewVipCodeTypeMap()
+func (client *Bl3Client) GetVipCodeUrlMap() (map[string]string, error) {
+	codeTypeUrlMap := make(map[string]string)
 
-	widgetConf := client.getWidgetConf("https://2kgames.crowdtwist.com/widgets/t/activity-list/9904/?__locale__=en#2")
+	widgetConf := client.getVipWidgetConf("https://2kgames.crowdtwist.com/widgets/t/activity-list/9904/?__locale__=en#2")
 	if widgetConf == nil {
 		return codeTypeUrlMap, errors.New("Failed to get code redemption types")
 	}
@@ -255,22 +196,28 @@ func (client *Bl3VipClient) GetCodeTypeUrlMap() (VipCodeTypeMap, error) {
 
 	for _, wid := range widgets {
 		for _, codeType := range GetCodeTypesInString(wid.WidgetName) {
-			codeTypeUrlMap[codeType] = "https://2kgames.crowdtwist.com/widgets/t/code-redemption/" + strconv.Itoa(wid.WidgetId)
+			widgetConf := client.getVipWidgetConf("https://2kgames.crowdtwist.com/widgets/t/code-redemption/" + strconv.Itoa(wid.WidgetId))
+			if widgetConf == nil {
+				codeTypeUrlMap[codeType] = ""
+				continue
+			}
+
+			campaignId, ok := widgetConf.Find("campaignId").(float64)
+			if !ok {
+				codeTypeUrlMap[codeType] = ""
+				continue
+			}
+			codeTypeUrlMap[codeType] = "https://2kgames.crowdtwist.com/code-redemption-campaign/redeem?cid=" + strconv.Itoa(int(campaignId))
 		}
 	}
-
+	
 	return codeTypeUrlMap, nil
 }
 
-func (client *Bl3VipClient) GetCodeRedemptionUrl(url string) (string, error) {
-	widgetConf := client.getWidgetConf(url)
-	if widgetConf == nil {
-		return "", errors.New("Failed to get code redemption url")
-	}
-
-	campaignId, ok := widgetConf.Find("campaignId").(float64)
-	if !ok {
-		return "", errors.New("Failed to get code redemption id")
-	}
-	return "https://2kgames.crowdtwist.com/code-redemption-campaign/redeem?cid=" + strconv.Itoa(int(campaignId)), nil
+func GetVipCodeUrlMap() map[string]string {
+	codeTypeUrlMap := make(map[string]string)
+	codeTypeUrlMap["email"] = "https://2kgames.crowdtwist.com/code-redemption-campaign/redeem?cid=5264"
+	codeTypeUrlMap["creator"] = "https://2kgames.crowdtwist.com/code-redemption-campaign/redeem?cid=5263"
+	codeTypeUrlMap["vault"] = "https://2kgames.crowdtwist.com/code-redemption-campaign/redeem?cid=5261"
+	return codeTypeUrlMap
 }
