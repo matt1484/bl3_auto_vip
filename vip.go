@@ -220,3 +220,31 @@ func (client *Bl3Client) GenerateVipCodeUrlMap() (map[string]string, error) {
 	
 	return codeTypeUrlMap, nil
 }
+
+func (client *Bl3Client) RedeemVipCode(codeType, code string) (string, bool) {
+	res, err := client.PostJson(client.Config.Vip.CodeTypeUrlMap[codeType], map[string]string {
+		"code": code,
+	})
+	if err != nil {
+		return "bad request", false
+	}
+
+	resJson, err := res.BodyAsJson()
+	if err != nil {
+		return "invalid response", false
+	}
+
+	exception := ""
+	resJson.From("exception.model").Out(&exception)
+	success := ""
+	resJson.Reset().From("message").Out(&success)
+	if exception != "" {
+		// technically the code may be valid but just unredeemable by this account (limits/already redeemed)
+		return exception, !strings.Contains(strings.ToLower(exception), "invalid")
+	}
+	if success != "" {
+		return success, true
+	}
+
+	return "wrong response format", false
+}

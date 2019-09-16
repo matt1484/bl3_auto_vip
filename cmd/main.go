@@ -99,7 +99,7 @@ func main() {
 		}
 
 		fmt.Print("Setting up codes of type '" + codeType + "' . . . . . ")
-		codeUrl, found := client.Config.Vip.CodeTypeUrlMap[codeType]
+		_, found := client.Config.Vip.CodeTypeUrlMap[codeType]
 		if !found {
 			fmt.Println("invalid! Moving on.")
 			continue
@@ -108,29 +108,12 @@ func main() {
 
 		for code := range codes {
 			fmt.Print("Trying '" + codeType + "' code '" + code + "' . . . . . ")
-
-			res, err := client.PostJson(codeUrl, map[string]string{
-				"code": code,
-			})
-			if err != nil {
+			res, valid := client.RedeemVipCode(codeType, code)
+			if !valid {
 				fmt.Println("failed! Moving on.")
 				continue
 			}
-
-			resJson, err := res.BodyAsJson()
-			if err != nil {
-				fmt.Println("failed! Moving on.")
-				continue
-			}
-
-			exception := resJson.Find("exception.model")
-			success := resJson.Reset().Find("message")
-			if exception != nil {
-				fmt.Println(exception)
-			}
-			if success != nil {
-				fmt.Println(success)
-			}
+			fmt.Println(res)
 		}
 	}
 	exit()
