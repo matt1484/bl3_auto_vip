@@ -118,6 +118,7 @@ func (client *HttpClient) PostJson(url string, data interface{}) (*HttpResponse,
 
 type Bl3Client struct {
 	HttpClient
+	Config Bl3Config
 }
 
 func NewBl3Client() (*Bl3Client, error) {
@@ -126,11 +127,24 @@ func NewBl3Client() (*Bl3Client, error) {
 		return nil, errors.New("Failed to start client")
 	}
 
+	res, err := client.Get("https://raw.githubusercontent.com/matt1484/bl3_auto_vip/master/config.json")
+	if err != nil {
+		return nil, errors.New("Failed to get config")
+	}
+
+	configJson, err := res.BodyAsJson()
+	if err != nil {
+		return nil, errors.New("Failed to get config")
+	}
+	config := Bl3Config{}
+	configJson.Out(&config)
+
 	client.SetDefaultHeader("Origin", "https://borderlands.com")
 	client.SetDefaultHeader("Referer", "https://borderlands.com/en-US/vip/")
 
 	return &Bl3Client {
-		*client,
+		HttpClient: *client,
+		Config: config,
 	}, nil
 }
 

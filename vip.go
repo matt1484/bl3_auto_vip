@@ -13,10 +13,13 @@ import (
 type VipCodeMap map[string]StringSet
 
 func (v VipCodeMap) Diff(other VipCodeMap) VipCodeMap {
-	diff := NewVipCodeMap()
+	diff := VipCodeMap{}
 	for codeType, codes := range v {
 		for code := range codes {
 			if _, found := other[codeType][code]; !found {
+				if _, found := diff[codeType]; !found {
+					diff[codeType] = StringSet{}
+				}
 				diff[codeType].Add(code)
 			}
 		}
@@ -32,35 +35,39 @@ func (v VipCodeMap) Add(codeType, code string) {
 	}
 }
 
-func GetCodeTypes() []string {
-	return []string{
-		"email",
-		"creator",
-		"vault",
-	}
+type VipConfig struct {
+	CodeTypeUrlMap map[string]string  `json:"codeTypes"`
 }
 
-func GetCodeTypesInString(s string) []string {
+func (conf *VipConfig) GetCodeTypes() []string {
+	codeTypes := make([]string, 0)
+	for codeType, _ := range conf.CodeTypeUrlMap {
+		codeTypes = append(codeTypes, codeType)
+	}
+	return codeTypes
+}
+
+func (conf *VipConfig) DetectCodeTypes(s string) []string {
 	l := strings.ToLower(s)
 	types := make([]string, 0)
-	for _, t := range GetCodeTypes() {
-		if strings.Contains(l, t) {
-			types = append(types, t)
+	for codeType, _ := range conf.CodeTypeUrlMap {
+		if strings.Contains(l, codeType) {
+			types = append(types, codeType)
 		}
 	}
 	return types
 }
 
-func NewVipCodeMap() VipCodeMap {
+func (conf *Bl3Config) NewVipCodeMap() VipCodeMap {
 	codeTypeMap := make(map[string]StringSet)
-	for _, codeType := range GetCodeTypes() {
+	for codeType, _ := range conf.Vip.CodeTypeUrlMap {
 		codeTypeMap[codeType] = StringSet{}
 	}
 	return codeTypeMap
 }
 
-func GetFullVipCodeMap() (VipCodeMap, error) {
-	codeMap := NewVipCodeMap()
+func (client *Bl3Client) GetFullVipCodeMap() (VipCodeMap, error) {
+	codeMap := client.Config.NewVipCodeMap()
 	httpClient, err := NewHttpClient()
 	if err != nil {
 		return codeMap, err
@@ -98,7 +105,7 @@ func GetFullVipCodeMap() (VipCodeMap, error) {
 			return true
 		})
 
-		for _, codeType := range GetCodeTypesInString(codeTypes) {
+		for _, codeType := range client.Config.Vip.DetectCodeTypes(codeTypes) {
 			codeMap[codeType].Add(code)
 		}
 	})
@@ -106,7 +113,7 @@ func GetFullVipCodeMap() (VipCodeMap, error) {
 }
 
 func (client *Bl3Client) GetRedeemedVipCodeMap() (VipCodeMap, error) {
-	codeMap := NewVipCodeMap()
+	codeMap := client.Config.NewVipCodeMap()
 
 	url := "https://2kgames.crowdtwist.com/request?widgetId=9470"
 	data := map[string]interface{}{
@@ -145,7 +152,7 @@ func (client *Bl3Client) GetRedeemedVipCodeMap() (VipCodeMap, error) {
 	resJson.From("model_data.activity.newest_activities").Out(&activities)
 
 	for _, act := range activities {
-		for _, codeType := range GetCodeTypesInString(act.CodeTypes) {
+		for _, codeType := range client.Config.Vip.DetectCodeTypes(act.CodeTypes) {
 			codeMap.Add(codeType, act.Code)
 		}
 	}
@@ -178,7 +185,7 @@ func (client *Bl3Client) getVipWidgetConf(url string) *gojsonq.JSONQ {
 	return json
 }
 
-func (client *Bl3Client) GetVipCodeUrlMap() (map[string]string, error) {
+func (client *Bl3Client) GenerateVipCodeUrlMap() (map[string]string, error) {
 	codeTypeUrlMap := make(map[string]string)
 
 	widgetConf := client.getVipWidgetConf("https://2kgames.crowdtwist.com/widgets/t/activity-list/9904/?__locale__=en#2")
@@ -195,7 +202,7 @@ func (client *Bl3Client) GetVipCodeUrlMap() (map[string]string, error) {
 	widgetConf.From("entries").Select("link.widgetId", "link.widgetName").Out(&widgets)
 
 	for _, wid := range widgets {
-		for _, codeType := range GetCodeTypesInString(wid.WidgetName) {
+		for _, codeType := range client.Config.Vip.DetectCodeTypes(wid.WidgetName) {
 			widgetConf := client.getVipWidgetConf("https://2kgames.crowdtwist.com/widgets/t/code-redemption/" + strconv.Itoa(wid.WidgetId))
 			if widgetConf == nil {
 				codeTypeUrlMap[codeType] = ""
@@ -212,12 +219,4 @@ func (client *Bl3Client) GetVipCodeUrlMap() (map[string]string, error) {
 	}
 	
 	return codeTypeUrlMap, nil
-}
-
-func GetVipCodeUrlMap() map[string]string {
-	codeTypeUrlMap := make(map[string]string)
-	codeTypeUrlMap["email"] = "https://2kgames.crowdtwist.com/code-redemption-campaign/redeem?cid=5264"
-	codeTypeUrlMap["creator"] = "https://2kgames.crowdtwist.com/code-redemption-campaign/redeem?cid=5263"
-	codeTypeUrlMap["vault"] = "https://2kgames.crowdtwist.com/code-redemption-campaign/redeem?cid=5261"
-	return codeTypeUrlMap
 }

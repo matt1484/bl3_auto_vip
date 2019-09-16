@@ -17,3 +17,8 @@ func JsonFromString(s string) *gojsonq.JSONQ {
 func JsonFromBytes(bytes []byte) *gojsonq.JSONQ {
 	return JsonFromString(string(bytes))
 }
+
+type Bl3Config struct {
+	Vip VipConfig `json:"vip"`
+	// Shift ShiftConfig
+}

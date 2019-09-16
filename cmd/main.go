@@ -46,8 +46,6 @@ func main() {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Enter password        : ")
 		bytes, _, _ := reader.ReadLine()
-		// bytes, _ := terminal.ReadPassword(0)
-		// fmt.Println("")
 		password = string(bytes)
 	}
 
@@ -57,6 +55,7 @@ func main() {
 		printError(err)
 		return
 	}
+
 	fmt.Println("success!")
 
 	fmt.Print("Logging in as '" + username + "' . . . . . ")
@@ -76,7 +75,7 @@ func main() {
 	fmt.Println("success!")
 
 	fmt.Print("Getting new codes . . . . . ")
-	allCodes, err := bl3.GetFullVipCodeMap()
+	allCodes, err := client.GetFullVipCodeMap()
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -94,17 +93,13 @@ func main() {
 		return
 	}
 
-	fmt.Print("Getting code redemption URLs . . . . . ")
-	codeUrlMap := bl3.GetVipCodeUrlMap()
-	fmt.Println("success!")
-
 	for codeType, codes := range newCodes {
 		if len(codes) < 1 {
 			continue
 		}
 
 		fmt.Print("Setting up codes of type '" + codeType + "' . . . . . ")
-		codeUrl, found := codeUrlMap[codeType]
+		codeUrl, found := client.Config.Vip.CodeTypeUrlMap[codeType]
 		if !found {
 			fmt.Println("invalid! Moving on.")
 			continue
