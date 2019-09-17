@@ -119,6 +119,7 @@ func (client *HttpClient) PostJson(url string, data interface{}) (*HttpResponse,
 type Bl3Client struct {
 	HttpClient
 	Config Bl3Config
+	SessionId string
 }
 
 func NewBl3Client() (*Bl3Client, error) {
@@ -139,12 +140,14 @@ func NewBl3Client() (*Bl3Client, error) {
 	config := Bl3Config{}
 	configJson.Out(&config)
 
-	client.SetDefaultHeader("Origin", "https://borderlands.com")
-	client.SetDefaultHeader("Referer", "https://borderlands.com/en-US/vip/")
+	for header, value := range config.RequestHeaders {
+		client.SetDefaultHeader(header, value)
+	}
 
 	return &Bl3Client {
 		HttpClient: *client,
 		Config: config,
+		SessionId: "",
 	}, nil
 }
 
@@ -154,7 +157,7 @@ func (client *Bl3Client) Login(username string, password string) error {
 		"password": password,
 	}
 
-	loginRes, err := client.PostJson("https://api.2k.com/borderlands/users/authenticate", data)
+	loginRes, err := client.PostJson(client.Config.LoginUrl, data)
 	if err != nil {
 		return errors.New("Failed to submit login credentials")
 	}
@@ -164,15 +167,16 @@ func (client *Bl3Client) Login(username string, password string) error {
 		return errors.New("Failed to login")
 	}
 
-	if loginRes.Header.Get("X-CT-REDIRECT") == "" {
+	if loginRes.Header.Get(client.Config.LoginRedirectHeader) == "" {
 		return errors.New("Failed to start session")
 	}
 
-	sessionRes, err := client.Get(loginRes.Header.Get("X-CT-REDIRECT"))
+	sessionRes, err := client.Get(loginRes.Header.Get(client.Config.LoginRedirectHeader))
 	if err != nil {
 		return errors.New("Failed to get session")
 	}
 	defer sessionRes.Body.Close()
 
+	client.SessionId = loginRes.Header.Get(client.Config.SessionIdHeader)
 	return nil
 }

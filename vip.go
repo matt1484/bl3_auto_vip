@@ -1,7 +1,6 @@
 package bl3_auto_vip
 
 import (
-	// "fmt"
 	"errors"
 	"strconv"
 	"strings"
@@ -79,7 +78,7 @@ func (client *Bl3Client) GetFullVipCodeMap() (VipCodeMap, error) {
 		return codeMap, err
 	}
 
-	response, err := httpClient.Get("https://www.reddit.com/r/borderlands3/comments/bxgq5p/borderlands_vip_program_codes/")
+	response, err := httpClient.Get(client.Config.Vip.CodeListUrl)
 	if err != nil {
 		return codeMap, errors.New("Failed to get code list")
 	}
@@ -89,8 +88,11 @@ func (client *Bl3Client) GetFullVipCodeMap() (VipCodeMap, error) {
 		return codeMap, err
 	}
 
-	redditHtml.Find("[data-test-id='post-content'] tbody tr").Each(func(i int, row *goquery.Selection) {
-		if len(row.Find("td").Nodes) < 4 {
+	redditHtml.Find(client.Config.Vip.CodeListRowSelector).Each(func(i int, row *goquery.Selection) {
+		numColumns := len(row.Find("td").Nodes)
+		if numColumns < client.Config.Vip.CodeListCheckIndex || 
+			numColumns < client.Config.Vip.CodeListCodeIndex || 
+			numColumns < client.Config.Vip.CodeListTypeIndex {
 			return
 		}
 
@@ -98,13 +100,14 @@ func (client *Bl3Client) GetFullVipCodeMap() (VipCodeMap, error) {
 		code := ""
 
 		row.Find("td").EachWithBreak(func(i int, col *goquery.Selection) bool {
-			if i == 2 && strings.Contains(strings.ToLower(col.Text()), "no") {
+			if i == client.Config.Vip.CodeListCheckIndex && 
+			    strings.Contains(strings.ToLower(col.Text()), client.Config.Vip.CodeListInvalidRegex) {
 				return false
 			}
-			if i == 0 {
+			if i == client.Config.Vip.CodeListCodeIndex {
 				code = strings.ToLower(col.Text())
 			}
-			if i == 3 {
+			if i == client.Config.Vip.CodeListTypeIndex {
 				codeTypes = strings.ToLower(col.Text())
 				return false
 			}
