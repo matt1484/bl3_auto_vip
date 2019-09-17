@@ -19,6 +19,11 @@ func JsonFromBytes(bytes []byte) *gojsonq.JSONQ {
 }
 
 type Bl3Config struct {
-	Vip VipConfig `json:"vip"`
-	// Shift ShiftConfig
+	Version string `json:"version"`
+	LoginUrl string `json:"loginUrl"`
+	LoginRedirectHeader string `json:"loginRedirectHeader"`
+	SessionIdHeader string `json:"sessionIdHeader"`
+	RequestHeaders map[string]string `json:"requestHeaders"`
+	Vip VipConfig `json:"vipConfig"`
+	Shift ShiftConfig `json:"shiftConfig"`
 }

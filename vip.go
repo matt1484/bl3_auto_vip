@@ -36,7 +36,13 @@ func (v VipCodeMap) Add(codeType, code string) {
 }
 
 type VipConfig struct {
-	CodeTypeUrlMap map[string]string  `json:"codeTypes"`
+	CodeListUrl string `json:"codeListUrl"`
+	CodeListRowSelector string `json:"codeListRowSelector"`
+	CodeListInvalidRegex string `json:"codeListInvalidRegex"`
+	CodeListCheckIndex int `json:"codeListCheckIndex"`
+	CodeListCodeIndex int `json:"codeListCodeIndex"`
+	CodeListTypeIndex int `json:"codeListTypeIndex"`
+	CodeTypeUrlMap map[string]string  `json:"codeTypeUrlMap"`
 }
 
 func (conf *VipConfig) GetCodeTypes() []string {
