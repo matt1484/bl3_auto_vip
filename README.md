@@ -1,6 +1,6 @@
 # BL3 Auto VIP
 
-Cross platform Go app for automatically redeeming VIP codes
+Cross platform Go app for automatically redeeming VIP/Shift codes
 for Borderlands 3
 
 ## Getting Started
@@ -10,7 +10,7 @@ for Borderlands 3
 3. Unzip the folder
 4. Run it, you will be prompted for username and password
 5. Enter username and password (we only use this info to sign into borderlands)
-6. Watch it do it’s magic
+6. Watch it do its magic
 7. Repeat when more codes come out
 
 
