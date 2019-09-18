@@ -12,6 +12,7 @@ project adheres to [Semantic Versioning](https://semver.org/).
 * GitHub Actions CI pipeline ([#6])
 * Change log
 * Shift code support ([#9])
+* Ability to redeem activities ([#10])
 * Config for future/updates
 
 ### Changed
