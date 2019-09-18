@@ -37,7 +37,6 @@ func (v VipCodeMap) Add(codeType, code string) {
 type VipActivity struct {
 	Title string `json:"title"`
 	Link string `json:"link_href"`
-	IsActive bool `json:"has_reached_freq_cap"`
 }
 
 type VipConfig struct {
@@ -277,7 +276,7 @@ func (client *Bl3Client) GetVipActivities() ([]VipActivity, error) {
 	if err != nil {
 		return activities, errors.New("failed to get activities")
 	}
-	responseJson.From("model_data.activity.activities").Select("title", "link_href", "user_activity_status.has_reached_freq_cap").Out(&activities)
+	responseJson.From("model_data.activity.activities").Where("user_activity_status.has_reached_freq_cap", "=", false).Select("title", "link_href").Out(&activities)
 
 	return activities, nil
 }
