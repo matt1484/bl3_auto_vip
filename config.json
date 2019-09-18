@@ -9,8 +9,8 @@
         "Referer": "https://borderlands.com/en-US/vip/"
     },
     "vipConfig": {
-        "codeListUrl": "https://www.reddit.com/r/borderlands3/comments/bxgq5p/borderlands_vip_program_codes/",
-        "codeListRowSelector": "[data-test-id='post-content'] tbody tr",
+        "codeListUrl": "http://orcz.com/Borderlands_VIP",
+        "codeListRowSelector": ".wikitable tbody tr",
         "codeListInvalidRegex": "no",
         "codeListCheckIndex": 2,
         "codeListCodeIndex": 0,
