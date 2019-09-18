@@ -5,12 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this
 project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## v2.1.0 - 2019-09-18
 ### Added
 * GitHub website - https://matt1484.github.io/bl3_auto_vip/
 * Go modules ([#1])
 * GitHub Actions CI pipeline ([#6])
 * Change log
+* Shift code support ([#9])
+* Config for future/updates
 
 ### Changed
 * Improve README
