@@ -2,8 +2,8 @@ github.com/PuerkitoBio/goquery v1.5.0 h1:uGvmFXOA73IKluu/F84Xd1tt/z07GYm8X49XKHP
 github.com/PuerkitoBio/goquery v1.5.0/go.mod h1:qD2PgZ9lccMbQlc7eEOjaeRlFQON7xY8kdmcsrnKqMg=
 github.com/andybalholm/cascadia v1.0.0 h1:hOCXnnZ5A+3eVDX8pvgl4kofXv2ELss0bKcqRySc45o=
 github.com/andybalholm/cascadia v1.0.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
-github.com/matt1484/bl3_auto_vip v0.0.0-20190911201126-2eea1b22e123 h1:tpu/yYPS96wFqiRtPgsistA3zqKWx3RTLshcYua9JW4=
-github.com/matt1484/bl3_auto_vip v0.0.0-20190911201126-2eea1b22e123/go.mod h1:mIIl4281QCwerPtciouQaWUd4hHJKafYkvm2opJm6RU=
+github.com/shibukawa/configdir v0.0.0-20170330084843-e180dbdc8da0 h1:Xuk8ma/ibJ1fOy4Ee11vHhUFHQNpHhrBneOCNHVXS5w=
+github.com/shibukawa/configdir v0.0.0-20170330084843-e180dbdc8da0/go.mod h1:7AwjWCpdPhkSmNAgUv5C7EJ4AbmjEB3r047r3DXWu3Y=
 github.com/thedevsaddam/gojsonq v2.2.2+incompatible h1:IDBN1FNzhv9p83n8JEnuu0rrlXIVFlf8K9lWuXPJHfI=
 github.com/thedevsaddam/gojsonq v2.2.2+incompatible/go.mod h1:RBcQaITThgJAAYKH7FNp2onYodRz8URfsuEGpAch0NA=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
