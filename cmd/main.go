@@ -37,6 +37,30 @@ func exit() {
 }
 
 func doVip(client *bl3.Bl3Client) {
+	fmt.Print("Getting available VIP activities (excluding codes) . . . . . ");
+	activities, err := client.GetVipActivities()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("success!")
+	foundActivities := false
+	for _, activity := range activities {
+		if !strings.Contains(strings.ToLower(activity.Title), "watch") && !strings.Contains(strings.ToLower(activity.Link), "video") {
+			foundActivities = true
+			fmt.Print("Trying VIP activity '" + activity.Title + "' . . . . . ")
+			if client.RedeemVipActivity(activity) {
+				fmt.Println("success!")
+			} else {
+				fmt.Println("failed!")
+			}
+		}
+	}
+	if !foundActivities {
+		fmt.Println("No new VIP activities at this time. Try again later.")
+	}
+	
+
 	configDirs := configdir.New("bl3-auto-vip", "bl3-auto-vip")
 	configFilename := usernameHash + "-vip-codes.json"
 	redeemedCodesCached := bl3.VipCodeMap{}

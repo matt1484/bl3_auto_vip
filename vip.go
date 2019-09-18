@@ -34,6 +34,12 @@ func (v VipCodeMap) Add(codeType, code string) {
 	}
 }
 
+type VipActivity struct {
+	Title string `json:"title"`
+	Link string `json:"link_href"`
+	IsActive bool `json:"has_reached_freq_cap"`
+}
+
 type VipConfig struct {
 	CodeListUrl string `json:"codeListUrl"`
 	CodeListRowSelector string `json:"codeListRowSelector"`
@@ -228,6 +234,61 @@ func (client *Bl3Client) GenerateVipCodeUrlMap() (map[string]string, error) {
 	}
 	
 	return codeTypeUrlMap, nil
+}
+
+func (client *Bl3Client) GetVipActivities() ([]VipActivity, error) {
+	activities := make([]VipActivity, 0)
+	widgetConf := client.getVipWidgetConf("https://2kgames.crowdtwist.com/widgets/t/activity-list/9446?__locale__=en")
+	if widgetConf == nil {
+		return activities, errors.New("failed to get activity names")
+	}
+	
+	type activity struct {
+		Name string `json:"name"`
+	}
+	activityNames := make([]activity, 0)
+	widgetConf.From("entries").Select("activity.name").Out(&activityNames)
+
+	names := make([]string, len(activityNames))
+	for i, activity := range activityNames {
+		names[i] = activity.Name
+	}
+	url := "https://2kgames.crowdtwist.com/request?widgetId=9446"
+	data := map[string]interface{}{
+		"model_data": map[string]interface{}{
+			"activity": map[string]interface{}{
+				"activities": map[string]interface{}{
+					"properties": []string{"title", "link_href", "user_activity_status"},
+					"query": map[string]interface{}{
+						"type": "activities_by_name",
+						"args": map[string]interface{}{
+							"names": names,
+						},
+					},
+				},
+			},
+		},
+	}
+	response, err := client.PostJson(url, data)
+	if err != nil {
+		return activities, errors.New("failed to get activities")
+	}
+	responseJson, err := response.BodyAsJson()
+	if err != nil {
+		return activities, errors.New("failed to get activities")
+	}
+	responseJson.From("model_data.activity.activities").Select("title", "link_href", "user_activity_status.has_reached_freq_cap").Out(&activities)
+
+	return activities, nil
+}
+
+func (client *Bl3Client) RedeemVipActivity(activity VipActivity) bool {
+	response, err := client.Get(activity.Link)
+	if err != nil {
+		return false
+	}
+	defer response.Body.Close()
+	return true
 }
 
 func (client *Bl3Client) RedeemVipCode(codeType, code string) (string, bool) {
