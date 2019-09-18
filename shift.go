@@ -21,6 +21,19 @@ type ShiftConfig struct {
 
 type ShiftCodeMap map[string][]string
 
+func (codeMap ShiftCodeMap) Contains(code, platform string) bool {
+	platforms, found := codeMap[code]
+	if !found {
+		return false
+	}
+	for _, p := range platforms {
+		if p == platform {
+			return true
+		}
+	}
+	return false
+}
+
 type shiftCode struct {
 	Game string `json:"offer_title"`
 	Platform string `json:"offer_service"`

@@ -2,17 +2,24 @@ package main
 
 import (
 	"bufio"
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 	"strconv"
+	// "strings"
 	"time"
 	
+	"github.com/shibukawa/configdir"
 	bl3 "github.com/matt1484/bl3_auto_vip"
 )
 
 // gross but effective for now
 const version = "2.1"
+
+var usernameHash string
 
 func printError(err error) {
 	fmt.Println("failed!")
@@ -89,7 +96,30 @@ func doShift(client *bl3.Bl3Client) {
 	}
 	fmt.Println("success!")
 
-	fmt.Print("Getting SHIFT codes . . . . . ")
+	configDirs := configdir.New("bl3-auto-vip", "bl3-auto-vip")
+	configFilename := usernameHash + "-shift-codes.json"
+
+	fmt.Print("Getting previously redeemed SHIFT codes . . . . . ")
+	redeemedCodes := bl3.ShiftCodeMap{}
+	folder := configDirs.QueryFolderContainsFile(configFilename)
+	if folder != nil {
+		data, err := folder.ReadFile(configFilename)
+		if err == nil {
+			json := bl3.JsonFromBytes(data)
+			if json != nil {
+				json.Out(&redeemedCodes)
+				fmt.Println("success!")
+			} else {
+				fmt.Println("not found.")
+			}
+		} else {
+			fmt.Println("not found.")
+		}
+	} else {
+		fmt.Println("not found.")
+	}
+
+	fmt.Print("Getting new SHIFT codes . . . . . ")
 	shiftCodes, err := client.GetFullShiftCodeList()
 	if err != nil {
 		printError(err)
@@ -97,26 +127,44 @@ func doShift(client *bl3.Bl3Client) {
 	}
 	fmt.Println("success!")
 
-
+	foundCodes := false
 	for code, codePlatforms := range shiftCodes {
 		for _, platform := range codePlatforms {
 			if _, found := platforms[platform]; found {
-				fmt.Print("Trying '" + platform + "' SHIFT code '" + code + "' . . . . . ")
-				err := client.RedeemShiftCode(code, platform)
-				if err != nil {
-					fmt.Println(err)
-				} else {
-					fmt.Println("success!")
+				if !redeemedCodes.Contains(code, platform) {
+					foundCodes = true
+					fmt.Print("Trying '" + platform + "' SHIFT code '" + code + "' . . . . . ")
+					err := client.RedeemShiftCode(code, platform)
+					if err != nil {
+						fmt.Println(err)
+						if strings.Contains(strings.ToLower(err.Error()), "already") {
+							redeemedCodes[code] = append(redeemedCodes[code], platform)
+						}
+					} else {
+						redeemedCodes[code] = append(redeemedCodes[code], platform)
+						fmt.Println("success!")
+					}
 				}
 			}
+		}
+	}
+
+	fmt.Println(redeemedCodes)
+	if !foundCodes {
+		fmt.Println("No new SHIFT codes at this time. Try again later.")
+	} else {
+		folders := configDirs.QueryFolders(configdir.System)
+		data, err := json.Marshal(&redeemedCodes)
+		if err == nil {
+			folders[0].WriteFile(configFilename, data)
 		}
 	}
 	
 }
 
 func main() {
-	var username string
-	var password string
+	username := ""
+	password := ""
 	flag.StringVar(&username, "e", "", "Email")
 	flag.StringVar(&username, "email", "", "Email")
 	flag.StringVar(&password, "p", "", "Password")
@@ -135,6 +183,10 @@ func main() {
 		bytes, _, _ := reader.ReadLine()
 		password = string(bytes)
 	}
+
+	hasher := md5.New()
+    hasher.Write([]byte(username))
+	usernameHash = hex.EncodeToString(hasher.Sum(nil))
 
 	fmt.Print("Setting up . . . . . ")
 	client, err := bl3.NewBl3Client()
