@@ -119,7 +119,6 @@ func (client *HttpClient) PostJson(url string, data interface{}) (*HttpResponse,
 type Bl3Client struct {
 	HttpClient
 	Config Bl3Config
-	SessionId string
 }
 
 func NewBl3Client() (*Bl3Client, error) {
@@ -147,7 +146,6 @@ func NewBl3Client() (*Bl3Client, error) {
 	return &Bl3Client {
 		HttpClient: *client,
 		Config: config,
-		SessionId: "",
 	}, nil
 }
 
@@ -177,6 +175,6 @@ func (client *Bl3Client) Login(username string, password string) error {
 	}
 	defer sessionRes.Body.Close()
 
-	client.SessionId = loginRes.Header.Get(client.Config.SessionIdHeader)
+	client.SetDefaultHeader(client.Config.SessionHeader, loginRes.Header.Get(client.Config.SessionIdHeader))
 	return nil
 }

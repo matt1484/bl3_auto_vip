@@ -15,7 +15,6 @@ func printError(err error) {
 	fmt.Println("failed!")
 	fmt.Print("Had error: ")
 	fmt.Println(err)
-	exit()
 }
 
 func exit() {
@@ -25,6 +24,91 @@ func exit() {
 		time.Sleep(time.Second)
 	}
 	fmt.Println("")
+}
+
+func doVip(client *bl3.Bl3Client) {
+	fmt.Print("Getting previously redeemed VIP codes . . . . . ")
+	redeemedCodes, err := client.GetRedeemedVipCodeMap()
+	if err != nil {
+		printError(err)
+		return
+	}
+	fmt.Println("success!")
+
+	fmt.Print("Getting new VIP codes . . . . . ")
+	allCodes, err := client.GetFullVipCodeMap()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("success!")
+
+	newCodes := allCodes.Diff(redeemedCodes)
+	codeCount := 0
+	for _, codes := range newCodes {
+		codeCount += len(codes)
+	}
+	if codeCount == 0 {
+		fmt.Println("No new VIP codes at this time. Try again later.")
+	} else {
+		for codeType, codes := range newCodes {
+			if len(codes) < 1 {
+				continue
+			}
+
+			fmt.Print("Setting up VIP codes of type '" + codeType + "' . . . . . ")
+			_, found := client.Config.Vip.CodeTypeUrlMap[codeType]
+			if !found {
+				fmt.Println("invalid! Moving on.")
+				continue
+			}
+			fmt.Println("success!")
+
+			for code := range codes {
+				fmt.Print("Trying '" + codeType + "' VIP code '" + code + "' . . . . . ")
+				res, valid := client.RedeemVipCode(codeType, code)
+				if !valid {
+					fmt.Println("failed! Moving on.")
+					continue
+				}
+				fmt.Println(res)
+			}
+		}
+	}
+}
+
+func doShift(client *bl3.Bl3Client) {
+	fmt.Print("Getting SHIFT platforms . . . . . ")
+	platforms, err := client.GetShiftPlatforms()
+	if err != nil {
+		printError(err)
+		return
+	}
+	fmt.Println("success!")
+
+	fmt.Print("Getting SHIFT codes . . . . . ")
+	shiftCodes, err := client.GetFullShiftCodeList()
+	if err != nil {
+		printError(err)
+		return
+	}
+	fmt.Println("success!")
+
+
+	for code, codePlatforms := range shiftCodes {
+		for _, platform := range codePlatforms {
+			if _, found := platforms[platform]; found {
+				fmt.Print("Trying '" + platform + "' SHIFT code '" + code + "' . . . . . ")
+				err := client.RedeemShiftCode(code, platform)
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					fmt.Println("success!")
+				}
+			}
+		}
+	}
+	
 }
 
 func main() {
@@ -66,55 +150,7 @@ func main() {
 	}
 	fmt.Println("success!")
 
-	fmt.Print("Getting previously redeemed codes . . . . . ")
-	redeemedCodes, err := client.GetRedeemedVipCodeMap()
-	if err != nil {
-		printError(err)
-		return
-	}
-	fmt.Println("success!")
-
-	fmt.Print("Getting new codes . . . . . ")
-	allCodes, err := client.GetFullVipCodeMap()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println("success!")
-
-	newCodes := allCodes.Diff(redeemedCodes)
-	codeCount := 0
-	for _, codes := range newCodes {
-		codeCount += len(codes)
-	}
-	if codeCount == 0 {
-		fmt.Println("No new codes at this time. Try again later.")
-		exit()
-		return
-	}
-
-	for codeType, codes := range newCodes {
-		if len(codes) < 1 {
-			continue
-		}
-
-		fmt.Print("Setting up codes of type '" + codeType + "' . . . . . ")
-		_, found := client.Config.Vip.CodeTypeUrlMap[codeType]
-		if !found {
-			fmt.Println("invalid! Moving on.")
-			continue
-		}
-		fmt.Println("success!")
-
-		for code := range codes {
-			fmt.Print("Trying '" + codeType + "' code '" + code + "' . . . . . ")
-			res, valid := client.RedeemVipCode(codeType, code)
-			if !valid {
-				fmt.Println("failed! Moving on.")
-				continue
-			}
-			fmt.Println(res)
-		}
-	}
+	doShift(client)
+	doVip(client)
 	exit()
 }

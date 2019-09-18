@@ -1,8 +1,9 @@
 {
-    "version": "1.3",
+    "version": "2.1",
     "loginUrl": "https://api.2k.com/borderlands/users/authenticate",
     "loginRedirectHeader": "X-CT-REDIRECT",
     "sessionIdHeader": "X-SESSION-SET",
+    "sessionHeader": "X-SESSION",
     "requestHeaders": {
         "Origin": "https://borderlands.com",
         "Referer": "https://borderlands.com/en-US/vip/"
@@ -29,6 +30,7 @@
         "codeListCodeIndex": 4,
 
         "codeInfoUrl": "https://api.2k.com/borderlands/code/",
-        "sessionHeader": "X-SESSION"
+        "userInfoUrl": "https://api.2k.com/borderlands/users/me",
+        "gameCodename": "oak"
     }
 }
