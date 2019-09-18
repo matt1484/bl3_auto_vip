@@ -126,7 +126,7 @@ func doVip(client *bl3.Bl3Client) {
 	if !foundCodes {
 		fmt.Println("No new VIP codes at this time. Try again later.")
 	} else {
-		folders := configDirs.QueryFolders(configdir.System)
+		folders := configDirs.QueryFolders(configdir.Global)
 		data, err := json.Marshal(&redeemedCodes)
 		if err == nil {
 			folders[0].WriteFile(configFilename, data)
@@ -199,7 +199,7 @@ func doShift(client *bl3.Bl3Client) {
 	if !foundCodes {
 		fmt.Println("No new SHIFT codes at this time. Try again later.")
 	} else {
-		folders := configDirs.QueryFolders(configdir.System)
+		folders := configDirs.QueryFolders(configdir.Global)
 		data, err := json.Marshal(&redeemedCodes)
 		if err == nil {
 			folders[0].WriteFile(configFilename, data)
