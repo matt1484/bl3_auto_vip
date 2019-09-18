@@ -83,12 +83,12 @@ func (client *Bl3Client) GetFullVipCodeMap() (VipCodeMap, error) {
 		return codeMap, errors.New("Failed to get code list")
 	}
 
-	redditHtml, err := response.BodyAsHtmlDoc()
+	codeHtml, err := response.BodyAsHtmlDoc()
 	if err != nil {
 		return codeMap, err
 	}
 
-	redditHtml.Find(client.Config.Vip.CodeListRowSelector).Each(func(i int, row *goquery.Selection) {
+	codeHtml.Find(client.Config.Vip.CodeListRowSelector).Each(func(i int, row *goquery.Selection) {
 		numColumns := len(row.Find("td").Nodes)
 		if numColumns < client.Config.Vip.CodeListCheckIndex || 
 			numColumns < client.Config.Vip.CodeListCodeIndex || 
@@ -105,7 +105,7 @@ func (client *Bl3Client) GetFullVipCodeMap() (VipCodeMap, error) {
 				return false
 			}
 			if i == client.Config.Vip.CodeListCodeIndex {
-				code = strings.ToLower(col.Text())
+				code = strings.TrimSpace(strings.ToLower(col.Text()))
 			}
 			if i == client.Config.Vip.CodeListTypeIndex {
 				codeTypes = strings.ToLower(col.Text())
