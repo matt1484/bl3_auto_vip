@@ -1,38 +1,55 @@
 # BL3 Auto VIP
 
-Cross platform Go app for automatically redeeming VIP codes for Borderlands 3
+Cross platform Go app for automatically redeeming VIP codes
+for Borderlands 3
 
-Current zips of standalone executable can be found at
-https://github.com/matt1484/bl3_auto_vip/releases
+## Getting Started
 
-### Getting Started:
 1. Make a VIP account at https://borderlands.com/en-US/vip/
 2. Download program from above link
 3. Unzip the folder
 4. Run it, you will be prompted for username and password
-5. Enter username and password (we don’t Store this information)
+5. Enter username and password (we only use this info to sign into borderlands)
 6. Watch it do it’s magic
 7. Repeat when more codes come out
 
-### To run from source:
+
+Run it with `--help` to view command line args that are supported.
+
+### Installing
+
+#### Using go
+```sh
+go get -u github.com/matt1484/bl3_auto_vip
+```
+
+#### Docker
+To run from source:
 1. install docker
 2. download project
 3. navigate to project
 4. run `docker build -t bl3 .`
 5. run `docker run -it bl3`
 
-Run it with `--help` to view command line args that are supported.
+#### Using the prebuilt releases
+The binaries/executables are released
+[here](https://github.com/matt1484/bl3_auto_vip/releases)
 
-### Update Log: 
-* v1.0: Initial release 
-* v1.1: Fixed timeout issues and added support for command line args (email and password) p.s. it is also much faster
-* v1.2: Added a timer so it does not immediately close when done and also added support for codes with multiple types
-* v1.2.1: Fixed bug where tables in comments would count as codes and add password masking
-* v1.3: Rewrote all code in go to add future mobile support (also more maintainable and smaller executable)
+## FAQs
 
-### To do:
-* shift codes redemption
-* auto facebook/instagram/twitter weekly points (cant watch videos but can read the articles maybe)
-* fake emails for referral points (captcha is making this hard, so maybe not...)
-* look into other login types (PSN, Xbox, etc.)
-* android/ios version 
+### Why does my operating system say it's an unrecgonized app?
+Telling the operating system that we're a trusted source is expensive.
+This is a small open source project and we don't have the funds to correctly
+sign the app.
+
+### Why does my antivirus flag this program?
+It's a false positive. If you don't trust us, you can look at the code and
+compile it yourself. That's one of the beauties of an open source project!
+
+### It's not working. What should I do?
+File an issue here with as much detail as you can provide. We're working on
+adding additional logging and a bug template to better assist with any issues.
+
+## License
+This project is licensed under the Apache-2.0 License - see the
+[LICENSE](LICENSE) file for details
