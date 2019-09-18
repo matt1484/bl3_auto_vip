@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	// "strings"
+	"strings"
 	"time"
 	
 	"github.com/shibukawa/configdir"
