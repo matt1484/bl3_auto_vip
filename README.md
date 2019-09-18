@@ -1,4 +1,4 @@
-# BL3 Auto VIP
+# BL3 Auto VIP + Shift
 
 Cross platform Go app for automatically redeeming VIP/Shift codes
 for Borderlands 3
