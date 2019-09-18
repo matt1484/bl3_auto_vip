@@ -11,6 +11,9 @@ import (
 	bl3 "github.com/matt1484/bl3_auto_vip"
 )
 
+// gross but effective for now
+const version = "2.1"
+
 func printError(err error) {
 	fmt.Println("failed!")
 	fmt.Print("Had error: ")
@@ -141,6 +144,10 @@ func main() {
 	}
 
 	fmt.Println("success!")
+
+	if client.Config.Version != version {
+		fmt.Println("Your version (" + version + ") is out of date. Please consider downloading the latest version (" + client.Config.Version + ") at https://github.com/matt1484/bl3_auto_vip/releases/latest")
+	}
 
 	fmt.Print("Logging in as '" + username + "' . . . . . ")
 	err = client.Login(username, password)
