@@ -29,7 +29,17 @@ To run from source:
 2. download project
 3. navigate to project
 4. run `docker build -t bl3 .`
-5. run `docker run -it bl3`
+5. run `docker run -it -v auto_bl3_vip:/root/.config/bl3-auto-vip bl3`
+    + The mounted volume will keep track of existing codes that have been used already
+
+#### Docker Compose
+To run from source:
+1. Installer docker and docker-compose
+2. Download project
+3. Navigate to project
+4. Run `BL3_EMAIL="me@myemail.com" BL3_PASSWORD="mypassword" docker-compose up`
+    + Replace `"me@myemail.com"` with your login email address
+    + Replace `"mypassword"` with your login password
 
 #### Using the prebuilt releases
 The binaries/executables are released
