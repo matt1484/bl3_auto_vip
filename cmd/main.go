@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	
+
 	"github.com/shibukawa/configdir"
 	bl3 "github.com/matt1484/bl3_auto_vip"
 )
@@ -134,7 +134,7 @@ func doVip(client *bl3.Bl3Client) {
 	}
 }
 
-func doShift(client *bl3.Bl3Client) {
+func doShift(client *bl3.Bl3Client, singleShiftCode string) {
 	fmt.Print("Getting SHIFT platforms . . . . . ")
 	platforms, err := client.GetShiftPlatforms()
 	if err != nil {
@@ -166,13 +166,28 @@ func doShift(client *bl3.Bl3Client) {
 		fmt.Println("not found.")
 	}
 
-	fmt.Print("Getting new SHIFT codes . . . . . ")
-	shiftCodes, err := client.GetFullShiftCodeList()
-	if err != nil {
-		printError(err)
-		return
+	shiftCodes := bl3.ShiftCodeMap{}
+
+	if singleShiftCode != "" {
+		singleShiftCode = strings.TrimSpace(strings.ToUpper(singleShiftCode))
+		fmt.Print("Checking single SHIFT code '" + singleShiftCode + "' . . . . . ")
+		platforms, valid := client.GetCodePlatforms(singleShiftCode)
+		if valid {
+			shiftCodes[singleShiftCode] = platforms
+			fmt.Println("success!")
+		} else {
+			fmt.Println("no available redemption platforms found!")
+		}
+	} else {
+		fmt.Print("Getting new SHIFT codes . . . . . ")
+		allShiftCodes, err := client.GetFullShiftCodeList()
+		if err != nil {
+			printError(err)
+			return
+		}
+		shiftCodes = allShiftCodes
+		fmt.Println("success!")
 	}
-	fmt.Println("success!")
 
 	foundCodes := false
 	for code, codePlatforms := range shiftCodes {
@@ -196,7 +211,9 @@ func doShift(client *bl3.Bl3Client) {
 		}
 	}
 
-	if !foundCodes {
+	if !foundCodes && singleShiftCode != "" {
+		fmt.Println("The single SHIFT code could not be redeemed at this time. Try again later.")
+	} else if !foundCodes {
 		fmt.Println("No new SHIFT codes at this time. Try again later.")
 	} else {
 		folders := configDirs.QueryFolders(configdir.Global)
@@ -211,10 +228,14 @@ func doShift(client *bl3.Bl3Client) {
 func main() {
 	username := ""
 	password := ""
+	singleShiftCode := ""
+	allowInactive := false
 	flag.StringVar(&username, "e", "", "Email")
 	flag.StringVar(&username, "email", "", "Email")
 	flag.StringVar(&password, "p", "", "Password")
 	flag.StringVar(&password, "password", "", "Password")
+	flag.StringVar(&singleShiftCode, "shift-code", "", "Single SHIFT code to redeem")
+	flag.BoolVar(&allowInactive, "allow-inactive", false, "Attempt to redeem SHIFT codes even if they are inactive?")
 	flag.Parse()
 
 	if username == "" {
@@ -241,6 +262,8 @@ func main() {
 		return
 	}
 
+	client.Config.Shift.AllowInactive = allowInactive
+
 	fmt.Println("success!")
 
 	if client.Config.Version != version {
@@ -255,7 +278,11 @@ func main() {
 	}
 	fmt.Println("success!")
 
-	doShift(client)
-	doVip(client)
+	doShift(client, singleShiftCode)
+
+	if singleShiftCode == "" {
+		doVip(client)
+	}
+
 	exit()
 }

@@ -17,6 +17,7 @@ type ShiftConfig struct {
 	CodeInfoUrl string `json:"codeInfoUrl"`
 	UserInfoUrl string `json:"userInfoUrl"`
 	GameCodename string `json:"gameCodename"`
+	AllowInactive bool
 }
 
 type ShiftCodeMap map[string][]string
@@ -56,9 +57,13 @@ func (client *Bl3Client) GetCodePlatforms(code string) ([]string, bool) {
 	codes := make([]shiftCode, 0)
 	json.From("entitlement_offer_codes").Select("offer_service", "is_active", "offer_title").Out(&codes)
 	for _, code := range codes {
-		if code.Active && code.Game == client.Config.Shift.GameCodename {
+		if (code.Active || client.Config.Shift.AllowInactive) && code.Game == client.Config.Shift.GameCodename {
 			platforms = append(platforms, code.Platform)
 		}
+	}
+
+	if len(platforms) == 0 {
+		return platforms, false
 	}
 
 	return platforms, true
