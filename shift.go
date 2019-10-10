@@ -62,6 +62,10 @@ func (client *Bl3Client) GetCodePlatforms(code string) ([]string, bool) {
 		}
 	}
 
+	if len(platforms) == 0 {
+		return platforms, false
+	}
+
 	return platforms, true
 }
 
