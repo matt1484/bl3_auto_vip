@@ -47,10 +47,20 @@ The binaries/executables are released
 
 ## FAQs
 
-### Why does my operating system say it's an unrecgonized app?
+### Why does my operating system say it's an unrecognized/untrusted app?
 Telling the operating system that we're a trusted source is expensive.
 This is a small open source project and we don't have the funds to correctly
 sign the app.
+
+### Running the app on macOS Catalina
+macOS Catalina may refuse to run the app because it is "from an unidentified developer".
+To get around this, right click on the app in Finder, and while holding the `⌥ Option` key,
+click `Open` in the menu. You will be prompted with a message similar to this:
+
+>macOS cannot verify the developer of "bl3-auto-vip". Are you sure you want to open it?
+
+Click the `Open` button and the app will run in your terminal. From that point forward
+you will be able to run the app directly or from your terminal without any issues.
 
 ### Why does my antivirus flag this program?
 It's a false positive. If you don't trust us, you can look at the code and
