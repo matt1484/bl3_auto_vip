@@ -201,6 +201,8 @@ func doShift(client *bl3.Bl3Client, singleShiftCode string) {
 						fmt.Println(err)
 						if strings.Contains(strings.ToLower(err.Error()), "already") {
 							redeemedCodes[code] = append(redeemedCodes[code], platform)
+						} else if strings.Contains(strings.ToLower(err.Error()), "has expired") {
+							redeemedCodes[code] = append(redeemedCodes[code], platform)
 						}
 					} else {
 						redeemedCodes[code] = append(redeemedCodes[code], platform)
