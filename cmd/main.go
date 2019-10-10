@@ -227,15 +227,15 @@ func doShift(client *bl3.Bl3Client, singleShiftCode string) {
 
 func main() {
 	username := ""
-	allowInactive := false
 	password := ""
 	singleShiftCode := ""
+	allowInactive := false
 	flag.StringVar(&username, "e", "", "Email")
 	flag.StringVar(&username, "email", "", "Email")
 	flag.StringVar(&password, "p", "", "Password")
-	flag.BoolVar(&allowInactive, "allow-inactive", false, "Attempt to redeem the single SHIFT code even if it is inactive?")
 	flag.StringVar(&password, "password", "", "Password")
 	flag.StringVar(&singleShiftCode, "shift-code", "", "Single SHIFT code to redeem")
+	flag.BoolVar(&allowInactive, "allow-inactive", false, "Attempt to redeem SHIFT codes even if they are inactive?")
 	flag.Parse()
 
 	if username == "" {
