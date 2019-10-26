@@ -208,6 +208,9 @@ func doShift(client *bl3.Bl3Client, singleShiftCode string) {
 						redeemedCodes[code] = append(redeemedCodes[code], platform)
 						fmt.Println("success!")
 					}
+				} else if singleShiftCode != "" {
+					fmt.Println("The single SHIFT code has already been redeemed on the '" + platform + "' platform")
+					foundCodes = true
 				}
 			}
 		}
