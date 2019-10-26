@@ -110,7 +110,7 @@ func (client *Bl3Client) RedeemShiftCode(code, platform string) error {
 	}
 
 	success := false
-	resJson.From("sucess").Out(&success)
+	resJson.From("success").Out(&success)
 	errs := make([]string, 0)
 	resJson.Reset().From("errors").Out(&errs)
 	if len(errs) > 0 {
