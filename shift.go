@@ -4,16 +4,10 @@ import (
 	"errors"
 	"strings"
 	"time"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 type ShiftConfig struct {
 	CodeListUrl string `json:"codeListUrl"`
-	CodeListRowSelector string `json:"codeListRowSelector"`
-	CodeListInvalidRegex string `json:"codeListInvalidRegex"`
-	CodeListCheckIndex int `json:"codeListCheckIndex"`
-	CodeListCodeIndex int `json:"codeListCodeIndex"`
 	CodeInfoUrl string `json:"codeInfoUrl"`
 	UserInfoUrl string `json:"userInfoUrl"`
 	GameCodename string `json:"gameCodename"`
@@ -39,6 +33,11 @@ type shiftCode struct {
 	Game string `json:"offer_title"`
 	Platform string `json:"offer_service"`
 	Active bool `json:"is_active"`
+}
+
+type shiftCodeFromList struct {
+	Code string `json:"code"`
+	Platform string `json:"platform"`
 }
 
 func (client *Bl3Client) GetCodePlatforms(code string) ([]string, bool) {
@@ -154,39 +153,24 @@ func (client *Bl3Client) GetFullShiftCodeList() (ShiftCodeMap, error) {
 		return codeMap, err
 	}
 
-	response, err := httpClient.Get(client.Config.Shift.CodeListUrl)
+	res, err := httpClient.Get(client.Config.Shift.CodeListUrl)
 	if err != nil {
-		return codeMap, errors.New("Failed to get code list")
+		return codeMap, errors.New("Failed to get SHIFT code list")
 	}
 
-	codeHtml, err := response.BodyAsHtmlDoc()
+	json, err := res.BodyAsJson()
 	if err != nil {
-		return codeMap, err
+		return codeMap, errors.New("Failed to get SHIFT code list body as JSON")
 	}
 
-	codeHtml.Find(client.Config.Shift.CodeListRowSelector).Each(func(i int, row *goquery.Selection) {
-		numColumns := len(row.Find("td").Nodes)
-		if numColumns < client.Config.Shift.CodeListCheckIndex || 
-			numColumns < client.Config.Shift.CodeListCodeIndex {
-			return
+	codes := make([]shiftCodeFromList, 0)
+	json.From("[0].codes").Select("code", "platform").Out(&codes)
+	for _, code := range codes {
+		platforms, valid := client.GetCodePlatforms(code.Code)
+		if valid {
+			codeMap[code.Code] = platforms
 		}
+	}
 
-		row.Find("td").EachWithBreak(func(i int, col *goquery.Selection) bool {
-			// not supported yet
-			// if i == client.Config.Shift.CodeListCheckIndex && 
-			//     strings.Contains(strings.ToLower(col.Text()), client.Config.Shift.CodeListInvalidRegex) {
-			// 	return false
-			// }
-			if i == client.Config.Shift.CodeListCodeIndex {
-				code := strings.TrimSpace(strings.ToUpper(col.Text()))
-				platforms, valid := client.GetCodePlatforms(code)
-				if valid {
-					codeMap[code] = platforms
-				}
-			}
-			return true
-		})
-
-	})
 	return codeMap, nil
 }
