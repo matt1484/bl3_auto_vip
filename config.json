@@ -23,12 +23,7 @@
         }
     },
     "shiftConfig": {
-        "codeListUrl": "http://orcz.com/Borderlands_3:_Shift_Codes",
-        "codeListRowSelector": ".wikitable tbody tr",
-        "codeListInvalidRegex": "",
-        "codeListCheckIndex": 3,
-        "codeListCodeIndex": 4,
-
+        "codeListUrl": "https://shift.orcicorn.com/tags/borderlands3/index.json",
         "codeInfoUrl": "https://api.2k.com/borderlands/code/",
         "userInfoUrl": "https://api.2k.com/borderlands/users/me",
         "gameCodename": "oak"
