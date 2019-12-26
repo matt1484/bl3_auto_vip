@@ -7,7 +7,7 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ## v2.1.0 - 2019-09-18
 ### Added
-* GitHub website - https://matt1484.github.io/bl3_auto_vip/
+* GitHub website - https://github.com/iiMatt666
 * Go modules ([#1])
 * GitHub Actions CI pipeline ([#6])
 * Change log

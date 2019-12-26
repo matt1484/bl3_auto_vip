@@ -20,7 +20,7 @@ Run it with `--help` to view command line args that are supported.
 
 #### Using go
 ```sh
-go get -u github.com/matt1484/bl3_auto_vip
+go get -u github.com/iiMatt666/bl3_auto_vip
 ```
 
 #### Docker
@@ -43,7 +43,7 @@ To run from source:
 
 #### Using the prebuilt releases
 The binaries/executables are released
-[here](https://github.com/matt1484/bl3_auto_vip/releases)
+[here](https://github.com/iiMatt666/bl3_auto_vip/releases)
 
 ## FAQs
 
