@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
-	"github.com/thedevsaddam/gojsonq"
+	"github.com/iiMatt666/goquery"
+	"github.com/iiMatt666/gojsonq"
 )
 
 type VipCodeMap map[string]StringSet
