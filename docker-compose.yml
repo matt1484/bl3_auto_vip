@@ -2,7 +2,7 @@ version: '3'
 services:
   auto-bl3:
     build: .
-    command: ["go", "run", "cmd/main.go", "-e", "${BL3_EMAIL}", "-p", "${BL3_PASSWORD}"]
+    command: ["go", "run", "cmd/main.go", "-e", "${matt_jam3s@hotmail.com}", "-p", "${Sonthepit1!}"]
     volumes:
       - codes:/root/.config/bl3-auto-vip
 volumes:
